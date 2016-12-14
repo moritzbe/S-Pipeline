@@ -1,15 +1,9 @@
 
 # coding: utf-8
-
-# In[16]:
-
 import pandas as pd
 import code
 
 
-# In[40]:
-
-#get_ipython().magic('time')
 
 sample_path = '1percent.csv'
 
@@ -20,18 +14,12 @@ receivable_headers = ["ALS_ID","ALG_ID","EXPECTED_LOSS","EXPECTED_LOSS_CUR_ID",
 "TRADE_DISPUTE","ADD_ON_DAYS","INCURRED_LOSS",
 "INCURRED_LOSS_CUR_ID","STATUS","STATUS_CURRENT",
 "INSOLVENCY_DEFAULT_DATE"]
+nt('Done: Reading the data')
 
-
-# In[41]:
-
-# print('Done: Reading the data')
-
-#df = pd.read_csv(sample_path, header= None, sep=';', infer_datetime_format=True)
 df = pd.read_csv(real_path, header= None, sep=';', infer_datetime_format=True, usecols=[3, 4, 12, 13, 14, 15, 16, 17, 20, 21, 28, 29, 33, 37, 43, 44, 46, 53, 59], low_memory=True)
 df.columns = receivable_headers
 
 
-# In[42]:
 
 print('Done: Reading the data')
 
@@ -47,7 +35,6 @@ df['EURO_AMOUNT_REMAINING'] = df.apply(lambda x: x['REMAINING_AMOUNT'] * dict_cu
 
 
 
-# In[71]:
 
 import numpy as np
 print('Done: currency conv.')
@@ -68,42 +55,22 @@ for x in remaining.columns:
     print(type(x), x, x < 2013)
     if (x < 2013 or x > 2015 ):
         remaining.drop(x, axis=1, inplace=True)
-# print(remaining)
+
+
 
 # ### Ratings
-
-# In[73]:
-
 print('Done: Nominal & Remaining, Doing Rating')
-# rating_headers = ["ALG_ID","RATING_VALUE"]
-# df2 = pd.read_csv('Rating_History_2.0.csv', header= None, sep=';', usecols=[1, 7], low_memory=True)
-# df2.columns= rating_headers
 
-# dict_rate = df2.set_index('ALG_ID')['RATING_VALUE'].to_dict()
-# pd.concat([df,pd.DataFrame(columns=['RATINGS'])])
-# df['RATINGS'] = df.apply(lambda x: dict_rate.get(x['ALG_ID'])*0.04761904762 if dict_rate.get(x['ALG_ID']) else 0.5, axis =1)
-
-
-# # In[74]:
-
-# rating = df.groupby(by=['ALS_ID'])['RATINGS'].mean()
-# rating
 
 
 # ### TradeDisplay 
-
-# In[44]:
-
 print('Done: Ratings')
 
 pd.concat([df,pd.DataFrame(columns=['TRADEDISP'])])
 df['TRADEDISP'] = df.apply(lambda x: 1 if ((x['TRADE_DISPUTE']==1) or  (x['TRADE_DISPUTE']==2)) else 0, axis =1)
 
 tradedisp = df.groupby(by=['ALS_ID'])['TRADEDISP'].mean()
-# tradedisp
 
-
-# In[45]:
 
 ### Current Status ------ 3 Features
 pd.concat([df,pd.DataFrame(columns=['BAD_STATUS_CURRENT'])])
@@ -139,9 +106,6 @@ print('Done: All other features')
 
 # ### Concat Features
 
-# In[72]:
-# features = pd.concat([nominal, remaining, rating, tradedisp, st1, st2, st3, st4, st5, st6], axis=1).reset_index()
-
 features = pd.concat([nominal, remaining, tradedisp, st1, st2, st3, st4, st5, st6], axis=1).reset_index()
 # features
 print('Done: concat')
@@ -150,14 +114,6 @@ code.interact(local=dict(globals(), **locals()))
 
 np.save("full_data_no_rating", features, allow_pickle=True, fix_imports=True)
 np.savetxt("full4avi_no_rating.csv", features, delimiter=";")
-
-
-# In[75]:
-
-#features.columns
-
-
-# In[ ]:
 
 
 
